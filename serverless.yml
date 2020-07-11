@@ -1,10 +1,48 @@
 service: sls-guru-test
+org: riverwalkdevelopers
+app: sls-guru-test
+
+plugins:
+  - serverless-appsync-plugin
+  - serverless-pseudo-parameters
 
 provider:
   name: aws
   runtime: nodejs12.x
+  profile: rwdvs
+  stackName: ${self:service}
+
+custom:
+  stage: ${opt:stage, 'dev'}
+  accountId: #{AWS::AccountId}
+  appSync:
+    name: ${file(./env.yml):${'${self:custom.stage}.PREFIX'}}_api_${self:custom.stage}
+    authenticationType: AMAZON_COGNITO_USER_POOLS
+    userPoolConfig:
+      awsRegion: #{AWS::Region}
+      defaultAction: ALLOW
+      userPoolId:  { Ref: CognitoUserPool } 
+    mappingTemplates:
+      - dataSource: awsLambdaDataSource
+        type: Query #Query, Mutation, Subscription
+        field: helloWorld
+        request: "request.txt"
+        response: "response.txt"
+    schema:
+    serviceRole: "AppSyncServiceRole"
+    dataSources:
+      - type: AWS_LAMBDA
+        name: awsLambdaDataSource
+        description: 'Lambda DataSource'
+        config:
+          functionName: graphql
+          # lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] } 
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
 
 functions:
-  hello:
+  graphql:
     handler: handler.graphql
 
+resources:
+  - ${file(resources/cognito.yml)}
+  - ${file(resources/appsync.yml)}

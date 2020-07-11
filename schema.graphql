@@ -1,7 +1,41 @@
-type Query {
-	helloWorld(consumer_key: String, consumer_secret: String): String!
+type Schema {
+	query: Query
+	mutation: Mutation
 }
 
-schema {
-	query: Query
+type Query {
+	helloWorld(consumer_key: String, consumer_secret: String): String!
+	batchGetEmployees(id: [String]): [Employee]
+	getEmployee(id: String!): Employee
+}
+
+type Mutation {
+	createEmployee(input: CreateEmployeeInput!): Employee
+	deleteEmployee(input: DeleteEmployeeInput!): Employee
+	updateEmployee(input: UpdateEmployeeInput!): Employee
+}
+
+type Employee {
+	id: String!
+	name: String
+	position: String
+	email: String
+}
+
+input CreateEmployeeInput {
+	id: String!
+	name: String
+	position: String
+	email: String
+}
+
+input UpdateEmployeeInput {
+	id: String!
+	name: String
+	position: String
+	email: String
+}
+
+input DeleteEmployeeInput {
+	id: String!
 }

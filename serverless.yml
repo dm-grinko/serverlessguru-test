@@ -1,48 +1,115 @@
-service: sls-guru-test
-org: riverwalkdevelopers
-app: sls-guru-test
+service: serverlessguru
+# org: riverwalkdevelopers
+# app: serverlessguru-test
 
 plugins:
-  - serverless-appsync-plugin
   - serverless-pseudo-parameters
+  - serverless-plugin-additional-stacks
+  - serverless-iam-roles-per-function
+  - serverless-plugin-include-dependencies
+  - serverless-appsync-plugin
 
 provider:
   name: aws
   runtime: nodejs12.x
   profile: rwdvs
+  region: ${file(./env.yml):${'${self:provider.stage}.REGION'}}
+  timeout: 120
   stackName: ${self:service}
+  stage: ${opt:stage, 'dev'}
 
 custom:
-  stage: ${opt:stage, 'dev'}
-  accountId: #{AWS::AccountId}
+  base: ${self:service}-${self:provider.stage}
+
+  dynamoDBTableName: ${self:custom.base}-employees
+
+  role:
+    arn: ${file(./env.yml):${'${self:provider.stage}.ARN_IAM'}}
+    cognito:
+      auth:
+        name: ${self:custom.base}-auth-CognitoRole
+        arn: { Fn::GetAtt: [CognitoAuthRole, Arn] }
+      unAuth:
+        name: ${self:custom.base}-unAuth-CognitoRole
+        arn: { Fn::GetAtt: [CognitoUnauthRole, Arn] }
+    dynamodb:
+      name: ${self:custom.base}-DynamoDB-AppSyncServiceRole
+      arn: ${self:custom.role.arn}/${self:custom.role.dynamodb.name}
+    lambda:
+      name: ${self:custom.base}-Lambda-AppSyncServiceRole
+      arn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+    logging:
+      name: ${self:custom.base}-Logging-AppSyncServiceRole
+      arn: { Fn::GetAtt: [AppSyncLoggingServiceRole, Arn] }
+
+  additionalStacks:
+    cognitoResources:
+      Deploy: Before
+      StackName: ${self:custom.base}-cognito
+      Resources: ${file(./resources/cognito.yml)}
+      Outputs: ${file(./resources/cognito-outputs.yml)}
+    dynamoDBResources:
+      Deploy: Before
+      StackName: ${self:custom.base}-dynamodb
+      Resources: ${file(./resources/dynamodb.yml)}
+
   appSync:
-    name: ${file(./env.yml):${'${self:custom.stage}.PREFIX'}}_api_${self:custom.stage}
-    authenticationType: AMAZON_COGNITO_USER_POOLS
-    userPoolConfig:
-      awsRegion: #{AWS::Region}
-      defaultAction: ALLOW
-      userPoolId:  { Ref: CognitoUserPool } 
+    name: ${self:custom.base}-api
+    authenticationType: AWS_IAM
+    logConfig:
+      loggingRoleArn: ${self:custom.role.logging.arn}
+      level: ALL
     mappingTemplates:
-      - dataSource: awsLambdaDataSource
-        type: Query #Query, Mutation, Subscription
+      - dataSource: LambdaDataSource
+        type: Query
         field: helloWorld
-        request: "request.txt"
-        response: "response.txt"
-    schema:
+        request: "request/lambda-invoke.vtl"
+        response: "response/generic.vtl"
+      - dataSource: EmployeesDataSource
+        type: Mutation
+        field: createEmployee
+        request: "request/db-employees-create-item.vtl"
+        response: "response/generic.vtl"
+      - dataSource: EmployeesDataSource
+        type: Mutation
+        field: deleteEmployee
+        request: "request/db-employees-delete-item.vtl"
+        response: "response/generic.vtl"
+      - dataSource: EmployeesDataSource
+        type: Mutation
+        field: updateEmployee
+        request: "request/db-employees-update-item.vtl"
+        response: "response/generic.vtl"
+      - dataSource: EmployeesDataSource
+        type: Query
+        field: batchGetEmployees
+        request: "request/db-employees-batch-get-${self:provider.stage}.vtl"
+        response: "response/db-employees-batch-get-${self:provider.stage}.vtl"
+      - dataSource: EmployeesDataSource
+        type: Query
+        field: getEmployee
+        request: "request/db-employees-get-item.vtl"
+        response: "response/generic.vtl"
+    mappingTemplatesLocation: "mapping-templates"
     serviceRole: "AppSyncServiceRole"
     dataSources:
       - type: AWS_LAMBDA
-        name: awsLambdaDataSource
+        name: LambdaDataSource
         description: 'Lambda DataSource'
         config:
           functionName: graphql
-          # lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] } 
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+      - type: AMAZON_DYNAMODB
+        name: EmployeesDataSource
+        description: 'Employees DataSource'
+        config:
+          tableName: ${self:custom.dynamoDBTableName}
+          serviceRoleArn: ${self:custom.role.dynamodb.arn}
 
 functions:
   graphql:
     handler: handler.graphql
 
 resources:
-  - ${file(resources/cognito.yml)}
-  - ${file(resources/appsync.yml)}
+  - ${file(resources/logging.yml)}
+  - ${file(resources/lambda.yml)}

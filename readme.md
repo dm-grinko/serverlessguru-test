@@ -1,0 +1,1 @@
+![serverlessguru](./serverless-guru-partner-header.png)

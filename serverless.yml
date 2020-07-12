@@ -1,6 +1,6 @@
 service: serverlessguru
-# org: riverwalkdevelopers
-# app: serverlessguru-test
+org: riverwalkdevelopers
+app: serverlessguru
 
 plugins:
   - serverless-pseudo-parameters

@@ -67,7 +67,7 @@ custom:
     serviceRole: "AppSyncServiceRole"
     dataSources:
       - type: AWS_LAMBDA
-        name: LambdaDataSource
+        name: UserDataSource
         description: 'Lambda DataSource'
         config:
           functionName: users
@@ -77,12 +77,6 @@ custom:
         description: 'Posts DataSource'
         config:
           tableName: ${self:custom.postTableName}
-          serviceRoleArn: ${self:custom.role.dynamodb.arn}
-      - type: AMAZON_DYNAMODB
-        name: UserDataSource
-        description: 'Users DataSource'
-        config:
-          tableName: ${self:custom.userTableName}
           serviceRoleArn: ${self:custom.role.dynamodb.arn}
 
 functions:

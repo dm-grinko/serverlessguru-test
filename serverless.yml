@@ -14,14 +14,16 @@ provider:
   runtime: nodejs12.x
   profile: rwdvs
   region: ${file(./env.yml):${'${self:provider.stage}.REGION'}}
-  timeout: 120
+  timeout: ${file(./env.yml):${'${self:provider.stage}.TIMEOUT'}}
   stackName: ${self:service}
   stage: ${opt:stage, 'dev'}
 
 custom:
   base: ${self:service}-${self:provider.stage}
 
-  dynamoDBTableName: ${self:custom.base}-employees
+  postTableName: ${self:custom.base}-posts
+  userTableName: ${self:custom.base}-users
+  lambdaFunctionName: ${self:custom.base}-users
 
   role:
     arn: ${file(./env.yml):${'${self:provider.stage}.ARN_IAM'}}
@@ -35,12 +37,12 @@ custom:
     dynamodb:
       name: ${self:custom.base}-DynamoDB-AppSyncServiceRole
       arn: ${self:custom.role.arn}/${self:custom.role.dynamodb.name}
-    lambda:
-      name: ${self:custom.base}-Lambda-AppSyncServiceRole
-      arn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
     logging:
       name: ${self:custom.base}-Logging-AppSyncServiceRole
       arn: { Fn::GetAtt: [AppSyncLoggingServiceRole, Arn] }
+    lambda:
+      name: ${self:custom.lambdaFunctionName}
+      arn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
 
   additionalStacks:
     cognitoResources:
@@ -60,55 +62,32 @@ custom:
       loggingRoleArn: ${self:custom.role.logging.arn}
       level: ALL
     mappingTemplates:
-      - dataSource: LambdaDataSource
-        type: Query
-        field: helloWorld
-        request: "request/lambda-invoke.vtl"
-        response: "response/generic.vtl"
-      - dataSource: EmployeesDataSource
-        type: Mutation
-        field: createEmployee
-        request: "request/db-employees-create-item.vtl"
-        response: "response/generic.vtl"
-      - dataSource: EmployeesDataSource
-        type: Mutation
-        field: deleteEmployee
-        request: "request/db-employees-delete-item.vtl"
-        response: "response/generic.vtl"
-      - dataSource: EmployeesDataSource
-        type: Mutation
-        field: updateEmployee
-        request: "request/db-employees-update-item.vtl"
-        response: "response/generic.vtl"
-      - dataSource: EmployeesDataSource
-        type: Query
-        field: batchGetEmployees
-        request: "request/db-employees-batch-get-${self:provider.stage}.vtl"
-        response: "response/db-employees-batch-get-${self:provider.stage}.vtl"
-      - dataSource: EmployeesDataSource
-        type: Query
-        field: getEmployee
-        request: "request/db-employees-get-item.vtl"
-        response: "response/generic.vtl"
-    mappingTemplatesLocation: "mapping-templates"
+      - ${file(resolvers/dynamodb.yml)}
+      - ${file(resolvers/lambda.yml)}
     serviceRole: "AppSyncServiceRole"
     dataSources:
       - type: AWS_LAMBDA
         name: LambdaDataSource
         description: 'Lambda DataSource'
         config:
-          functionName: graphql
-          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: users
+          serviceRoleArn: ${self:custom.role.lambda.arn}
       - type: AMAZON_DYNAMODB
-        name: EmployeesDataSource
-        description: 'Employees DataSource'
+        name: PostDataSource
+        description: 'Posts DataSource'
         config:
-          tableName: ${self:custom.dynamoDBTableName}
+          tableName: ${self:custom.postTableName}
+          serviceRoleArn: ${self:custom.role.dynamodb.arn}
+      - type: AMAZON_DYNAMODB
+        name: UserDataSource
+        description: 'Users DataSource'
+        config:
+          tableName: ${self:custom.userTableName}
           serviceRoleArn: ${self:custom.role.dynamodb.arn}
 
 functions:
-  graphql:
-    handler: handler.graphql
+  users:
+    handler: handler.users
 
 resources:
   - ${file(resources/logging.yml)}

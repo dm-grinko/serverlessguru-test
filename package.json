@@ -5,9 +5,12 @@
   "main": "handler.js",
   "scripts": {
     "deploy:dev": "npm run step:1 && npm run step:2 && npm run step:3",
+    "deploy:prod": "npm run step:1 && npm run step:4 && npm run step:5",
     "step:1": "SLS_DEBUG=*",
     "step:2": "sls deploy additionalstacks --stage dev --verbose",
-    "step:3": "sls deploy --stage dev --verbose"
+    "step:3": "sls deploy --stage dev --verbose",
+    "step:4": "sls deploy additionalstacks --stage dev --verbose",
+    "step:5": "sls deploy --stage dev --verbose"
   },
   "repository": {
     "type": "git",

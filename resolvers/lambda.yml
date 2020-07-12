@@ -1,0 +1,17 @@
+- dataSource: UserDataSource
+  type: Mutation
+  field: createUser
+  request: "../mapping-templates/request/lambda-users-create-user.vtl"
+  response: "../mapping-templates/response/generic.vtl"
+
+- dataSource: UserDataSource
+  type: Query
+  field: getUser
+  request: "../mapping-templates/request/lambda-users-get-user.vtl"
+  response: "../mapping-templates/response/generic.vtl"
+
+- dataSource: UserDataSource
+  type: Query
+  field: getAllUsers
+  request: "../mapping-templates/request/lambda-users-get-all-users.vtl"
+  response: "../mapping-templates/response/generic.vtl"

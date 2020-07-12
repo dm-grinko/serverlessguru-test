@@ -1,41 +1,67 @@
-type Schema {
-	query: Query
-	mutation: Mutation
+schema {
+    query: Query
+    mutation: Mutation
 }
 
 type Query {
-	helloWorld(consumer_key: String, consumer_secret: String): String!
-	batchGetEmployees(id: [String]): [Employee]
-	getEmployee(id: String!): Employee
+    getPost(id: ID): Post
+    getUser(id: ID): User
+    getAllUsers: [User]!
 }
 
 type Mutation {
-	createEmployee(input: CreateEmployeeInput!): Employee
-	deleteEmployee(input: DeleteEmployeeInput!): Employee
-	updateEmployee(input: UpdateEmployeeInput!): Employee
+	allPostsByAuthor(author: String!, count: Int, nextToken: String): PaginatedPosts!
+
+	allPost(count: Int, nextToken: String): PaginatedPosts!
+
+	deletePost(id: ID!, expectedVersion: Int): Post
+
+	upvotePost(id: ID!): Post
+
+    downvotePost(id: ID!): Post
+
+    updatePost(
+        id: ID!,
+        author: String,
+        title: String,
+        content: String,
+        url: String,
+        expectedVersion: Int!
+    ): Post
+
+    addPost(
+		id: ID!,
+        author: String!
+        title: String!
+        content: String!
+        url: String!
+    ): Post!
+
+    createUser(
+		id: ID!,
+        name: String!
+        email: String!
+    ): User!
 }
 
-type Employee {
-	id: String!
-	name: String
-	position: String
-	email: String
+type Post {
+    id: ID!
+    author: String
+    title: String
+    content: String
+    url: String
+    ups: Int!
+    downs: Int!
+    version: Int!
 }
 
-input CreateEmployeeInput {
-	id: String!
-	name: String
-	position: String
-	email: String
+type PaginatedPosts {
+    posts: [Post!]!
+    nextToken: String
 }
 
-input UpdateEmployeeInput {
-	id: String!
-	name: String
-	position: String
-	email: String
-}
-
-input DeleteEmployeeInput {
-	id: String!
+type User {
+	id: ID!,
+	name: String!
+	email: String!
 }

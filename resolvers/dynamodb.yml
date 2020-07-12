@@ -1,0 +1,47 @@
+- dataSource: PostDataSource
+  type: Mutation
+  field: allPostsByAuthor
+  request: "../mapping-templates/request/db-posts-query.vtl"
+  response: "../mapping-templates/response/db-posts-query.vtl"
+
+- dataSource: PostDataSource
+  type: Mutation
+  field: allPost
+  request: "../mapping-templates/request/db-posts-scan.vtl"
+  response: "../mapping-templates/response/db-posts-scan.vtl"
+
+- dataSource: PostDataSource
+  type: Mutation
+  field: addPost
+  request: "../mapping-templates/request/db-posts-create-item.vtl"
+  response: "../mapping-templates/response/generic.vtl"
+
+- dataSource: PostDataSource
+  type: Mutation
+  field: deletePost
+  request: "../mapping-templates/request/db-posts-delete-item.vtl"
+  response: "../mapping-templates/response/generic.vtl"
+
+- dataSource: PostDataSource
+  type: Mutation
+  field: updatePost
+  request: "../mapping-templates/request/db-posts-update-item.vtl"
+  response: "../mapping-templates/response/generic.vtl"
+
+- dataSource: PostDataSource
+  type: Mutation
+  field: upvotePost
+  request: "../mapping-templates/request/db-posts-update-item-ups.vtl"
+  response: "../mapping-templates/response/generic.vtl"
+
+- dataSource: PostDataSource
+  type: Mutation
+  field: downvotePost
+  request: "../mapping-templates/request/db-posts-update-item-downs.vtl"
+  response: "../mapping-templates/response/generic.vtl"
+
+- dataSource: PostDataSource
+  type: Query
+  field: getPost
+  request: "../mapping-templates/request/db-posts-get-item.vtl"
+  response: "../mapping-templates/response/generic.vtl"

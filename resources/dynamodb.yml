@@ -1,4 +1,4 @@
-EmployeeTable:
+PostTable:
   Type: 'AWS::DynamoDB::Table'
   Properties:
     KeySchema:
@@ -12,7 +12,23 @@ EmployeeTable:
     ProvisionedThroughput:
       ReadCapacityUnits: 1
       WriteCapacityUnits: 1
-    TableName: ${self:custom.dynamoDBTableName}
+    TableName: ${self:custom.postTableName}
+
+UserTable:
+  Type: 'AWS::DynamoDB::Table'
+  Properties:
+    KeySchema:
+      - 
+        AttributeName: id
+        KeyType: HASH
+    AttributeDefinitions:
+      - 
+        AttributeName: id
+        AttributeType: S
+    ProvisionedThroughput:
+      ReadCapacityUnits: 1
+      WriteCapacityUnits: 1
+    TableName: ${self:custom.userTableName}
 
 AppSyncDynamoDBServiceRole:
   Type: "AWS::IAM::Role"
@@ -46,6 +62,8 @@ AppSyncDynamoDBServiceRole:
                 - "dynamodb:UpdateItem"
                 - "dynamodb:BatchGetItem"
               Resource: 
-                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.dynamoDBTableName}"
-                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.dynamoDBTableName}/*"
+                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.postTableName}"
+                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.postTableName}/*"
+                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.userTableName}"
+                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.userTableName}/*"
 

@@ -19,7 +19,7 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action:
-                  - "lambda:invokeFunction"
+                  - "lambda:InvokeFunction"
                 Resource:
-                  - "${file(./env.yml):${'${self:provider.stage}.ARN_LAMBDA'}}/${self:custom.lambdaFunctionName}"
-                  - "${file(./env.yml):${'${self:provider.stage}.ARN_LAMBDA'}}/${self:custom.lambdaFunctionName}/*"
+                  - "${file(./env.yml):${'${self:provider.stage}.ARN_LAMBDA'}}:${self:custom.lambdaFunctionName}"
+                  - "${file(./env.yml):${'${self:provider.stage}.ARN_LAMBDA'}}:${self:custom.lambdaFunctionName}/*"

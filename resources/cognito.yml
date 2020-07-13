@@ -22,7 +22,7 @@ IdentityPool:
   Type: AWS::Cognito::IdentityPool
   Properties:
     IdentityPoolName: ${self:custom.base}-identity-pool
-    AllowUnauthenticatedIdentities: false
+    AllowUnauthenticatedIdentities: true
     CognitoIdentityProviders:
       - ClientId:
           Ref: UserPoolClient

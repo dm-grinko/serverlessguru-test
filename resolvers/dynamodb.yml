@@ -1,12 +1,12 @@
 - dataSource: PostDataSource
-  type: Mutation
-  field: allPostsByAuthor
+  type: Query
+  field: getAllPostsByAuthor
   request: "../mapping-templates/request/db-posts-query.vtl"
   response: "../mapping-templates/response/db-posts-query.vtl"
 
 - dataSource: PostDataSource
-  type: Mutation
-  field: allPost
+  type: Query
+  field: getAllPosts
   request: "../mapping-templates/request/db-posts-scan.vtl"
   response: "../mapping-templates/response/db-posts-scan.vtl"
 

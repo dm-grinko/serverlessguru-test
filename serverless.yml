@@ -17,6 +17,8 @@ provider:
   timeout: ${file(./env.yml):${'${self:provider.stage}.TIMEOUT'}}
   stackName: ${self:service}
   stage: ${opt:stage, 'dev'}
+  restApi: false
+  cfnRole: ${file(./env.yml):${'${self:provider.stage}.ARN_CFN'}}
 
 custom:
   base: ${self:service}-${self:provider.stage}
@@ -57,8 +59,8 @@ custom:
 
   appSync:
     name: ${self:custom.base}-api
-    # authenticationType: AWS_IAM
-    authenticationType: API_KEY
+    authenticationType: AWS_IAM
+    # authenticationType: API_KEY
     logConfig:
       loggingRoleArn: ${self:custom.role.logging.arn}
       level: ALL

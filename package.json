@@ -9,8 +9,8 @@
     "step:1": "SLS_DEBUG=*",
     "step:2": "sls deploy additionalstacks --stage dev --verbose",
     "step:3": "sls deploy --stage dev --verbose",
-    "step:4": "sls deploy additionalstacks --stage dev --verbose",
-    "step:5": "sls deploy --stage dev --verbose"
+    "step:4": "sls deploy additionalstacks --stage prod --verbose",
+    "step:5": "sls deploy --stage prod --verbose"
   },
   "repository": {
     "type": "git",

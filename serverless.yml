@@ -57,7 +57,8 @@ custom:
 
   appSync:
     name: ${self:custom.base}-api
-    authenticationType: AWS_IAM
+    # authenticationType: AWS_IAM
+    authenticationType: API_KEY
     logConfig:
       loggingRoleArn: ${self:custom.role.logging.arn}
       level: ALL

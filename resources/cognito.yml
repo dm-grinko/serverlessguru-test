@@ -62,8 +62,8 @@ CognitoAuthRole:
             - Effect: "Allow"
               Action:
                 - appSync:GraphQL
-              Resource: "*"
-                # - arn:aws:appsync:#{self:provider.stage}:#{AWS::AccountId}:apis/*/*
+              Resource:
+                - "${file(./env.yml):${'${self:provider.stage}.ARN_APIS'}}"
 
 CognitoUnauthRole:
   Type: AWS::IAM::Role
@@ -97,8 +97,8 @@ CognitoUnauthRole:
             - Effect: "Allow"
               Action:
                 - appSync:GraphQL
-              Resource: "*"
-                # - arn:aws:appsync:#{AWS::Region}:#{AWS::AccountId}:apis/*/types/Query/fields/getPost
+              Resource: 
+                - "${file(./env.yml):${'${self:provider.stage}.ARN_APIS'}}"
 
 IdentityPoolRoles:
   Type: AWS::Cognito::IdentityPoolRoleAttachment

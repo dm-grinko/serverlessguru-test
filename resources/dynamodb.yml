@@ -12,7 +12,7 @@ PostTable:
     ProvisionedThroughput:
       ReadCapacityUnits: 1
       WriteCapacityUnits: 1
-    TableName: ${self:custom.postTableName}
+    TableName: ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.POSTS.NAME'}}
 
 UserTable:
   Type: 'AWS::DynamoDB::Table'
@@ -28,12 +28,12 @@ UserTable:
     ProvisionedThroughput:
       ReadCapacityUnits: 1
       WriteCapacityUnits: 1
-    TableName: ${self:custom.userTableName}
+    TableName: ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.USERS.NAME'}}
 
 AppSyncDynamoDBServiceRole:
   Type: "AWS::IAM::Role"
   Properties:
-    RoleName: ${self:custom.role.dynamodb.name}
+    RoleName: ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.ROLE_NAME'}}
     AssumeRolePolicyDocument:
       Version: "2012-10-17"
       Statement:
@@ -46,7 +46,7 @@ AppSyncDynamoDBServiceRole:
             - "sts:AssumeRole"
     Policies:
       - 
-        PolicyName: ${self:custom.role.dynamodb.name}-Policy
+        PolicyName: ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.POLICY_NAME'}}
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -62,8 +62,8 @@ AppSyncDynamoDBServiceRole:
                 - "dynamodb:UpdateItem"
                 - "dynamodb:BatchGetItem"
               Resource: 
-                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.postTableName}"
-                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.postTableName}/*"
-                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.userTableName}"
-                - "${file(./env.yml):${'${self:provider.stage}.ARN_DB'}}/${self:custom.userTableName}/*"
+                - ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.POSTS.RESOURCE'}}
+                - ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.POSTS.RESOURCE'}}/*
+                - ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.USERS.RESOURCE'}}
+                - ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.USERS.RESOURCE'}}/*
 

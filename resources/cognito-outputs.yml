@@ -2,14 +2,14 @@ UserPoolId:
     Value:
         Ref: UserPool
     Export:
-        Name: ${self:custom.base}-UserPoolId
+        Name: ${file(./env.yml):${'${self:provider.stage}.COGNITO.USER_POOL.ID.EXPORT_NAME'}}
 UserPoolClientId:
     Value:
         Ref: UserPoolClient
     Export:
-        Name: ${self:custom.base}-UserPoolClientId
+        Name: ${file(./env.yml):${'${self:provider.stage}.COGNITO.USER_POOL_CLIENT.ID.EXPORT_NAME'}}
 IdentityPoolId:
     Value:
         Ref: IdentityPool
     Export:
-        Name: ${self:custom.base}-IdentityPoolId
+        Name: ${file(./env.yml):${'${self:provider.stage}.COGNITO.IDENTITY_POOL.ID.EXPORT_NAME'}}

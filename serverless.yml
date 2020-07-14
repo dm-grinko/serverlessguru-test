@@ -5,7 +5,6 @@ app: serverlessguru
 plugins:
   - serverless-pseudo-parameters
   - serverless-plugin-additional-stacks
-  - serverless-iam-roles-per-function
   - serverless-plugin-include-dependencies
   - serverless-appsync-plugin
 
@@ -18,72 +17,45 @@ provider:
   stackName: ${self:service}
   stage: ${opt:stage, 'dev'}
   restApi: false
-  cfnRole: ${file(./env.yml):${'${self:provider.stage}.ARN_CFN'}}
+  cfnRole: ${file(./env.yml):${'${self:provider.stage}.CLOUD_FORMATION.ROLE'}}
 
 custom:
-  base: ${self:service}-${self:provider.stage}
-
-  postTableName: ${self:custom.base}-posts
-  userTableName: ${self:custom.base}-users
-  lambdaFunctionName: ${self:custom.base}-users
-
-  role:
-    arn: ${file(./env.yml):${'${self:provider.stage}.ARN_IAM'}}
-    cognito:
-      auth:
-        name: ${self:custom.base}-auth-CognitoRole
-        arn: { Fn::GetAtt: [CognitoAuthRole, Arn] }
-      unAuth:
-        name: ${self:custom.base}-unAuth-CognitoRole
-        arn: { Fn::GetAtt: [CognitoUnauthRole, Arn] }
-    dynamodb:
-      name: ${self:custom.base}-DynamoDB-AppSyncServiceRole
-      arn: ${self:custom.role.arn}/${self:custom.role.dynamodb.name}
-    logging:
-      name: ${self:custom.base}-Logging-AppSyncServiceRole
-      arn: { Fn::GetAtt: [AppSyncLoggingServiceRole, Arn] }
-    lambda:
-      name: ${self:custom.lambdaFunctionName}
-      arn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
-
   additionalStacks:
     cognitoResources:
       Deploy: Before
-      StackName: ${self:custom.base}-cognito
+      StackName: ${file(./env.yml):${'${self:provider.stage}.COGNITO.STACK_NAME'}}
       Resources: ${file(./resources/cognito.yml)}
       Outputs: ${file(./resources/cognito-outputs.yml)}
     dynamoDBResources:
       Deploy: Before
-      StackName: ${self:custom.base}-dynamodb
+      StackName: ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.STACK_NAME'}}
       Resources: ${file(./resources/dynamodb.yml)}
 
   appSync:
-    name: ${self:custom.base}-api
-    authenticationType: AWS_IAM
-    # authenticationType: API_KEY
+    name: ${file(./env.yml):${'${self:provider.stage}.APP_SYNC.NAME'}}
+    authenticationType: API_KEY
     logConfig:
-      loggingRoleArn: ${self:custom.role.logging.arn}
+      loggingRoleArn: ${file(./env.yml):${'${self:provider.stage}.LOGGING.SERVICE_ARN'}}
       level: ALL
     mappingTemplates:
       - ${file(resolvers/dynamodb.yml)}
       - ${file(resolvers/lambda.yml)}
-    serviceRole: "AppSyncServiceRole"
     dataSources:
       - type: AWS_LAMBDA
         name: UserDataSource
         description: 'Lambda DataSource'
         config:
-          functionName: users
-          serviceRoleArn: ${self:custom.role.lambda.arn}
+          lambdaFunctionArn: ${file(./env.yml):${'${self:provider.stage}.LAMBDA.ARN'}}
+          serviceRoleArn: ${file(./env.yml):${'${self:provider.stage}.LAMBDA.SERVICE_ARN'}}
       - type: AMAZON_DYNAMODB
         name: PostDataSource
         description: 'Posts DataSource'
         config:
-          tableName: ${self:custom.postTableName}
-          serviceRoleArn: ${self:custom.role.dynamodb.arn}
+          tableName: ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.POSTS.NAME'}}
+          serviceRoleArn: ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.SERVICE_ARN'}}
 
 functions:
-  users:
+  UserLambda:
     handler: handler.users
 
 resources:

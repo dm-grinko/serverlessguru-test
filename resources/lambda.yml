@@ -2,7 +2,7 @@ Resources:
   AppSyncLambdaServiceRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: "Lambda-${self:custom.appSync.serviceRole}"
+      RoleName: ${file(./env.yml):${'${self:provider.stage}.LAMBDA.ROLE_NAME'}}
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -13,7 +13,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: "Lambda-${self:custom.appSync.serviceRole}-Policy"
+        - PolicyName: ${file(./env.yml):${'${self:provider.stage}.LAMBDA.POLICY_NAME'}}
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -21,5 +21,5 @@ Resources:
                 Action:
                   - "lambda:InvokeFunction"
                 Resource:
-                  - "${file(./env.yml):${'${self:provider.stage}.ARN_LAMBDA'}}:${self:custom.lambdaFunctionName}"
-                  - "${file(./env.yml):${'${self:provider.stage}.ARN_LAMBDA'}}:${self:custom.lambdaFunctionName}/*"
+                  - ${file(./env.yml):${'${self:provider.stage}.LAMBDA.RESOURCE'}}
+                  - ${file(./env.yml):${'${self:provider.stage}.LAMBDA.RESOURCE'}}/*

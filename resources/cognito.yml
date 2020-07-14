@@ -1,7 +1,7 @@
 UserPool:
   Type: AWS::Cognito::UserPool
   Properties:
-    UserPoolName: ${self:custom.base}-userpool
+    UserPoolName: "${file(./env.yml):${'${self:provider.stage}.COGNITO.USER_POOL.NAME'}}"
     UsernameAttributes:
       - phone_number
     Schema:
@@ -13,7 +13,7 @@ UserPool:
 UserPoolClient:
   Type: AWS::Cognito::UserPoolClient
   Properties:
-    ClientName: ${self:custom.base}-client
+    ClientName: "${file(./env.yml):${'${self:provider.stage}.COGNITO.USER_POOL_CLIENT.NAME'}}"
     GenerateSecret: false
     UserPoolId:
       Ref: UserPool
@@ -21,7 +21,7 @@ UserPoolClient:
 IdentityPool:
   Type: AWS::Cognito::IdentityPool
   Properties:
-    IdentityPoolName: ${self:custom.base}-identity-pool
+    IdentityPoolName: "${file(./env.yml):${'${self:provider.stage}.COGNITO.IDENTITY_POOL.NAME'}}"
     AllowUnauthenticatedIdentities: true
     CognitoIdentityProviders:
       - ClientId:
@@ -32,7 +32,7 @@ IdentityPool:
 CognitoAuthRole:
   Type: AWS::IAM::Role
   Properties:
-    RoleName: ${self:custom.role.cognito.auth.name}
+    RoleName: "${file(./env.yml):${'${self:provider.stage}.COGNITO.AUTH.ROLE_NAME'}}"
     Path: /
     AssumeRolePolicyDocument:
       Version: "2012-10-17"
@@ -49,7 +49,7 @@ CognitoAuthRole:
             # "ForAnyValue:StringLike":
             #   "cognito-identity.amazonaws.com:amr": authenticated
     Policies:
-      - PolicyName: ${self:custom.role.cognito.auth.name}-Policy
+      - PolicyName: ${file(./env.yml):${'${self:provider.stage}.COGNITO.AUTH.POLICY_NAME'}}
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -63,12 +63,12 @@ CognitoAuthRole:
               Action:
                 - appSync:GraphQL
               Resource:
-                - "${file(./env.yml):${'${self:provider.stage}.ARN_APIS'}}"
+                - ${file(./env.yml):${'${self:provider.stage}.COGNITO.AUTH.RESOURCE'}}
 
 CognitoUnauthRole:
   Type: AWS::IAM::Role
   Properties:
-    RoleName: ${self:custom.role.cognito.unAuth.name}
+    RoleName: ${file(./env.yml):${'${self:provider.stage}.COGNITO.UNAUTH.ROLE_NAME'}}
     Path: /
     AssumeRolePolicyDocument:
       Version: "2012-10-17"
@@ -85,7 +85,7 @@ CognitoUnauthRole:
             # "ForAnyValue:StringLike":
             #   "cognito-identity.amazonaws.com:amr": unauthenticated
     Policies:
-      - PolicyName: ${self:custom.role.cognito.unAuth.name}-Policy
+      - PolicyName: ${file(./env.yml):${'${self:provider.stage}.COGNITO.UNAUTH.POLICY_NAME'}}
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -98,7 +98,7 @@ CognitoUnauthRole:
               Action:
                 - appSync:GraphQL
               Resource: 
-                - "${file(./env.yml):${'${self:provider.stage}.ARN_APIS'}}"
+                - ${file(./env.yml):${'${self:provider.stage}.COGNITO.UNAUTH.RESOURCE'}}
 
 IdentityPoolRoles:
   Type: AWS::Cognito::IdentityPoolRoleAttachment
@@ -106,7 +106,5 @@ IdentityPoolRoles:
     IdentityPoolId:
       Ref: IdentityPool
     Roles:
-      authenticated:
-        Fn::GetAtt: [CognitoAuthRole, Arn]
-      unauthenticated:
-        Fn::GetAtt: [CognitoUnauthRole, Arn]
+      authenticated: ${file(./env.yml):${'${self:provider.stage}.COGNITO.AUTH.SERVICE_ARN'}}
+      unauthenticated: ${file(./env.yml):${'${self:provider.stage}.COGNITO.UNAUTH.SERVICE_ARN'}}

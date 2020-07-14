@@ -2,7 +2,7 @@ Resources:
   AppSyncLoggingServiceRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: ${self:custom.role.logging.name}
+      RoleName: ${file(./env.yml):${'${self:provider.stage}.LOGGING.ROLE_NAME'}}
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -13,7 +13,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: ${self:custom.role.logging.name}-Policy
+        - PolicyName: ${file(./env.yml):${'${self:provider.stage}.LOGGING.POLICY_NAME'}}
           PolicyDocument:
             Version: "2012-10-17"
             Statement:

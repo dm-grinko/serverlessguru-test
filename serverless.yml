@@ -55,7 +55,7 @@ custom:
           serviceRoleArn: ${file(./env.yml):${'${self:provider.stage}.DYNAMODB.SERVICE_ARN'}}
 
 functions:
-  users:
+  UserLambda:
     handler: handler.users
 
 resources:

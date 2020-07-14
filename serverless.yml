@@ -14,7 +14,7 @@ provider:
   profile: rwdvs
   region: ${file(./env.yml):${'${self:provider.stage}.REGION'}}
   timeout: ${file(./env.yml):${'${self:provider.stage}.TIMEOUT'}}
-  stackName: ${self:service}
+  stackName: ${self:service}-${'${self:provider.stage}
   stage: ${opt:stage, 'dev'}
   restApi: false
   cfnRole: ${file(./env.yml):${'${self:provider.stage}.CLOUD_FORMATION.ROLE'}}
